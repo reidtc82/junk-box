@@ -27,9 +27,10 @@ async def test_mathprimatives_add_function():
 
 
 # test that the mathprimatives class can return a function that adds two numbers
-def test_mathprimatives_add():
+@pytest.mark.asyncio
+async def test_mathprimatives_add():
     mathprimatives = MathPrimitives()
-    assert mathprimatives.add()(1, 2) == 3
+    assert await mathprimatives.add()(1, 2) == 3
 
 
 # test that the mathprimatives class can return a function that subtracts two numbers

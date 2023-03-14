@@ -19,9 +19,11 @@ def test_mathprimatives_instantiation():
 
 
 # test that the mathprimatives class can return a function
-def test_mathprimatives_return_function():
+# use pytest-asyncio to test async functions
+@pytest.mark.asyncio
+async def test_mathprimatives_add_function():
     mathprimatives = MathPrimitives()
-    assert mathprimatives.add() is not None
+    assert await mathprimatives.add() is not None
 
 
 # test that the mathprimatives class can return a function that adds two numbers

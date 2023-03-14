@@ -16,13 +16,14 @@
 
 from junkbox.JunkBox import JunkBox
 from junkbox.junkbox_driver import JunkBoxPool
+import asyncio
 
 
 class MathPrimitives:
     def __init__(self):
         pass
 
-    def add(self) -> callable:
+    async def add(self) -> callable:
         return lambda a, b: a + b
 
     def subtract(self):

@@ -22,8 +22,10 @@
 
 # executors will connect to the driver through a socket and add themselves to the executor list in doing so
 
-from multiprocessing import Process
 import asyncio
+import itertools
+import uuid
+from multiprocessing import Process
 
 
 class State:
@@ -34,42 +36,19 @@ class State:
 
 class JunkBoxPool:
     def __init__(self):
-        self._state = State.STOPPED
-        self.processes = []
+        self.loop = asyncio.get_event_loop()
+        self.tasks = {}
 
-    def __enter__(self):
-        self._state = State.RUNNING
+    def __enter__(self, *args, **kwargs):
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._state = State.STOPPED
+    # __exit__ for this class when used as a context manager
+    def __exit__(self, *args, **kwargs):
+        pass
 
     def apply_async(self, target, args) -> str:
-        if self._state == State.RUNNING:
-            result = None
+        coro = target(*args)
+        self.tasks[str(uuid.uuid4())] = self.loop.create_task(coro)
 
-            def internal_target(*args):
-                result = target(*args)
-
-            process = Process(target=internal_target, args=(result, args))
-            self.processes.append(process)
-            process.start()
-            yield result
-
-    def map(self, func, args):
-        if self._state == State.RUNNING:
-            for arg in args:
-                process = Process(target=func, args=arg)
-                self.processes.append(process)
-                process.start()
-                yield process
-
-    def join(self, timeout=None):
-        for process in self.processes:
-            process.join(timeout=timeout)
-
-    def get(self):
-        results = []
-        for process in self.processes:
-            results.append(process)
-        return results
+    def join(self):
+        yield from asyncio.gather(*self.tasks.values())
